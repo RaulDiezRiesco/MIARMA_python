@@ -1,0 +1,9 @@
+# requirements.txt
+# Este archivo lista las librerías necesarias para ejecutar el proyecto.
+# Librerías requeridas:
+numpy
+pandas
+matplotlib
+scipy
+statsmodels
+

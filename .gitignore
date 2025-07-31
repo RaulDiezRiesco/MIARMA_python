@@ -1,0 +1,14 @@
+# Ignorar carpetas
+001_datos/
+002_resultados/
+
+# Ignorar temporales de Python
+__pycache__/
+*.pyc
+desktop.ini
+
+
+# Ignorar entorno virtual
+venv/
+.env/
+

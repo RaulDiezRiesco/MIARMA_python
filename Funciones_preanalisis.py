@@ -52,7 +52,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import skew, kurtosis
-from typing import Callable,Tuple,Union,List,Optiona
+from typing import Callable,Tuple,Union,List,Optional
 
 # =============================================================
 # ⚙️ 3. CONFIGURACIÓN GLOBAL (config.py)

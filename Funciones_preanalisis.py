@@ -33,10 +33,8 @@ datos no válidos.
    - `preguntar_si_no()`: Función lógica para interactuar con el usuario. 
 
 ────────────────────────────────────────────────────────────────────────────
-⚙️ DEPENDENCIAS:
-- Estándar: os, typing
-- Terceros: numpy, pandas, matplotlib, seaborn, scipy
-- Internos: config.py, Funcion_log.py
+RETORNO FINAL:
+   - información del análisis realizado en log y visualizaciones.
 """
 
 # =============================================================

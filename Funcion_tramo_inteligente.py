@@ -798,7 +798,7 @@ def interpolar_tramos_cortos(
         else:
             log_msg(f"⚠️ Se encontraron NaNs pero ningún tramo era interpolable (>{max_huecos} consecutivos).")
 
-    return serie_interpolada
+    return serie_interpolada, tramos_interpolados_log
 
 def seleccionar_tramo_inteligente_para_arma(
     serie: pd.Series,
@@ -861,7 +861,6 @@ def seleccionar_tramo_inteligente_para_arma(
     media_total = serie.mean()
     var_total = serie.var()
     interpolacion_aplicada = False
-    tramos_interpolados_log = []
 
     # Primer intento: Tests + Score
     resultado = _buscar_por_tests(

@@ -232,13 +232,15 @@ def imputar_forward_en_idx(
     log_msg: Optional[Callable[[str], None]] = None,
 ) -> Optional[float]:
     """
-    Imputa el valor en la posición `idx` de una serie temporal utilizando un modelo ARIMA
-    entrenado hacia adelante, es decir, solo con observaciones anteriores al punto a imputar.
+    Imputa el valor en la posición `idx` de una serie temporal utilizando un modelo ARIMA 
+    entrenado únicamente con datos anteriores al índice (contexto histórico).
 
-    La función prueba distintas longitudes de contexto, desde `min_contexto` hasta `max_contexto`,
-    en incrementos de `step_contexto`, buscando el primer modelo que converja y produzca una
-    predicción válida.
-
+    Este método predice el valor faltante hacia adelante en el tiempo, usando una ventana de 
+    contexto previa al `idx`. Se prueba una serie de longitudes de contexto, desde 
+    `min_contexto` hasta `max_contexto`, buscando el primer modelo que:
+        - Converja correctamente.
+        - Genere una predicción válida y coherente (mediante validación estadística).
+        
     Parámetros:
         serie (pd.Series): Serie temporal con posibles valores NaN.
         idx (int): Índice posicional (no label) del valor a imputar. Debe ser un NaN.
@@ -262,7 +264,6 @@ def imputar_forward_en_idx(
         try:
             # Obtener contexto hacia atrás desde idx
             contexto = serie.iloc[:idx].tail(context_len).reset_index(drop=True)
-
             if len(contexto) < context_len:
                 continue  # Contexto insuficiente
 
@@ -274,16 +275,28 @@ def imputar_forward_en_idx(
                 enforce_stationarity=enforce_stationarity,
                 enforce_invertibility=enforce_invertibility
             )
-            # Primer intento con parámetros iniciales, si se desea
+
+            # Primer intento con parámetros iniciales
             if parametros and usar_parametros_iniciales:
                 try:
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore", ConvergenceWarning)
                         fitted = modelo.fit(start_params=parametros)
+
                     if fitted.mle_retvals.get("converged", False):
                         pred = fitted.forecast(steps=1).iloc[0]
+                        media, std = contexto.mean(), contexto.std()
+                        if std > 0:
+                            z = abs(pred - media) / std
+                            if z > 3:
+                                log_msg(f" ⚠️ Z-score alto ({z:.2f}) → predicción posiblemente atípica, descartada")
+                                continue
+
+                        log_msg(f" 🔮 Predicción forward en idx={idx}: {pred:.5f}")
                         return pred, context_len
+
                     log_msg(" ⚠️ No convergió con start_params, probando sin ellos...")
+
                 except Exception as e:
                     log_msg(f" ⚠️ Error con start_params: {e}")
 
@@ -294,6 +307,13 @@ def imputar_forward_en_idx(
 
             if fitted.mle_retvals.get("converged", False):
                 pred = fitted.forecast(steps=1).iloc[0]
+                media, std = contexto.mean(), contexto.std()
+                if std > 0:
+                    z = abs(pred - media) / std
+                    if z > 3:
+                        log_msg(f" ⚠️ Z-score alto ({z:.2f}) → predicción posiblemente atípica, descartada")
+                        continue
+
                 log_msg(f" 🔮 Predicción forward en idx={idx}: {pred:.5f}")
                 return pred, context_len
 
@@ -320,13 +340,18 @@ def imputar_backward_en_idx(
     log_msg: Optional[Callable[[str], None]] = None,
 ) -> Optional[float]:
     """
-    Imputa el valor en la posición `idx` de una serie temporal utilizando un modelo ARIMA,
-    entrenado sobre los datos posteriores al índice, pero invertidos para simular una 
-    predicción "hacia atrás" en el tiempo.
+    Imputa el valor en la posición `idx` de una serie temporal utilizando un modelo ARIMA 
+    entrenado con los datos futuros (posteriores al índice), simulando una predicción hacia atrás.
 
-    Se prueban distintas longitudes de contexto, desde `min_contexto` hasta `max_contexto`,
-    y se selecciona la primera predicción válida generada por un modelo que haya convergido.
+    Para lograr esto, se extrae una ventana de contexto posterior al valor faltante, se invierte 
+    temporalmente (último dato se vuelve el más reciente) y se ajusta un modelo ARIMA sobre ella. 
+    Luego se genera una predicción a un paso para estimar el valor original perdido.
 
+    El proceso prueba distintas longitudes de contexto (`min_contexto` a `max_contexto`), en 
+    incrementos de `step_contexto`, buscando el primer modelo que:
+        - Converja correctamente.
+        - Genere una predicción válida y coherente (verificada mediante validación estadística).
+    
     Parámetros:
         serie (pd.Series): Serie temporal con valores NaN.
         idx (int): Índice posicional del valor a imputar. Debe corresponder a un NaN.
@@ -371,9 +396,21 @@ def imputar_backward_en_idx(
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore", ConvergenceWarning)
                         fitted = modelo.fit(start_params=parametros)
+
                     if fitted.mle_retvals.get("converged", False):
-                        return fitted.forecast(steps=1).iloc[0], context_len
+                        pred = fitted.forecast(steps=1).iloc[0]
+                        media, std = contexto.mean(), contexto.std()
+                        if std > 0:
+                            z = abs(pred - media) / std
+                            if z > 3:
+                                log_msg(f" ⚠️ Z-score alto ({z:.2f}) → predicción posiblemente atípica, descartada")
+                                continue
+
+                        log_msg(f" 🔮 Predicción backward en idx={idx}: {pred:.5f}")
+                        return pred, context_len
+
                     log_msg(" ⚠️ No convergió con start_params, probando sin ellos...")
+
                 except Exception as e:
                     log_msg(f" ⚠️ Error con start_params: {e}")
 
@@ -384,6 +421,13 @@ def imputar_backward_en_idx(
 
             if fitted.mle_retvals.get("converged", False):
                 pred = fitted.forecast(steps=1).iloc[0]
+                media, std = contexto.mean(), contexto.std()
+                if std > 0:
+                    z = abs(pred - media) / std
+                    if z > 3:
+                        log_msg(f" ⚠️ Z-score alto ({z:.2f}) → predicción posiblemente atípica, descartada")
+                        continue
+
                 log_msg(f" 🔮 Predicción backward en idx={idx}: {pred:.5f}")
                 return pred, context_len
 

@@ -50,9 +50,9 @@ Con estos pasos, el proyecto estará listo para ejecutar y utilizar.
 
 ## 3. Uso
 
-En esta sección se mostrará un vídeo explicativo sobre cómo utilizar esta herramienta para imputar valores nulos en series temporales. El vídeo detallará el flujo principal, modos de ejecución y opciones disponibles.
+En esta sección se mostrará un vídeo explicativo sobre cómo utilizar esta herramienta para imputar valores nulos en series temporales.
 
-_El enlace al vídeo se añadirá próximamente aquí._
+📽️ [Ver video explicativo](https://github.com/RaulDiezRiesco/MIARMA_python/releases/download/v1.0.0/Video.Explicativo.MIARMA.mp4)
 
 El uso básico consiste en ejecutar el script principal (`main.py`) y seguir las instrucciones en pantalla, o bien utilizar el modo automático para procesar múltiples archivos.
 

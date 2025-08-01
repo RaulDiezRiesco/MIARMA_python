@@ -115,10 +115,11 @@ Para consultas sobre uso, redistribución, modificación o cualquier otra cuesti
 Para cualquier consulta, duda o sugerencia relacionada con este proyecto, puede contactar a:
 
 - **Raúl Díez Riesco** — desarrollador principal  
-  Email: raul.diez@iaa.es
+  Email: rauldiezriesco@gmail.com
 
 - **Javier Pascual** — contacto adicional  
   Email: javier@iaa.es
+  
   Email(2): j.pascual@csic.es
 
 - **Instituto de Astrofísica de Andalucía (IAA)**  

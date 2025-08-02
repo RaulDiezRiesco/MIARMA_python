@@ -633,7 +633,7 @@ def seleccionar_modelo_optimo(
         score_total= score_relajado(modelo_final)
         log_msg(
             f"⚠️ Modelo parcialmente validado: {modelo_final[6]} orden={modelo_final[3]} "
-            f"{criterio.upper()}={modelo_final[criterio_idx]:.2f} | Score total ponderado={score_val:.4f}"
+            f"{criterio.upper()}={modelo_final[criterio_idx]:.2f} | Score total ponderado={score_total:.4f}"
         )
         return modelo_final[0], resumen(modelo_final, "Parcialmente")
 
